@@ -15,6 +15,22 @@ This infrastructure includes:
 
 ## ⚙️ Deployment
 
+### AWS Setup
+Run the following command to configure AWS credentials:
+```sh
+aws configure
+```
+Enter:
+- **Access Key ID**
+- **Secret Access Key**
+- **Region** (e.g., `us-east-1`)
+- **Output Format** (e.g., `json`)
+
+For session token:
+```sh
+aws configure set aws_session_token <YOUR_SESSION_TOKEN>
+```
+
 To deploy this infrastructure, run:
 ```sh
 terraform init
