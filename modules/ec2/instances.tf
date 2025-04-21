@@ -4,6 +4,8 @@ resource "aws_instance" "public_instance" {
     key_name = var.key_pair_name
     subnet_id = var.public_subnet
 
+    associate_public_ip_address = true
+
     tags = {
         Name = "public_instance"
     }
