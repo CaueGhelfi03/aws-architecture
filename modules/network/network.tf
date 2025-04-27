@@ -78,6 +78,10 @@ resource "aws_security_group" "basic_security" {
   }
 }
 
+output "basic_security_group_id" {
+  value = aws_security_group.basic_security.id
+}
+
 output "vpc_id" {
   value = var.vpc_id
 }

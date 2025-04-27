@@ -57,6 +57,7 @@ resource "aws_subnet" "public_subnet" {
   vpc_id     = aws_vpc.vpc_main.id
   cidr_block = var.public_subnet_cidrs[0]
   availability_zone = "us-east-1a"
+  map_public_ip_on_launch = true
 
   tags = {
     Name = "public_subnet"
@@ -87,8 +88,11 @@ module "instance" {
   key_pair_name        = var.key_pair_name
   public_subnet        = module.network.public_subnet_id
   private_subnet       = module.network.private_subnet_id
+  private_subnet_id = module.network.private_subnet_id
+  public_subnet_id = module.network.public_subnet_id
   public_instance_type = var.public_instance_type
   private_instance_type = var.private_instance_type
+  basic_security_group_id = module.network.basic_security_group_id
 }
 
 output "vpc_id" {

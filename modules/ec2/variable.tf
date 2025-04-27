@@ -18,6 +18,21 @@ variable "public_subnet" {
   type = string
 }
 
+variable "public_subnet_id" {
+  type    = string
+  description = " Public subnet CIDRs "
+}
+
+variable "private_subnet_id" {
+  type    = string
+  description = "Private subnet CIDRs"
+}
+
 variable "private_subnet" {
   type = string
+}
+
+variable "basic_security_group_id" {
+  description = "Basic security group ID"
+  type        = string
 }
