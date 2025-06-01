@@ -35,6 +35,12 @@ resource "aws_route" "public_route" {
   gateway_id = aws_internet_gateway.internet_gateway.id
 }
 
+resource "aws_route" "private_route_no_nat" {
+  route_table_id = aws_route_table.private_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.nat_gateway.id
+}
+
 resource "aws_eip" "nat_iep" {
   vpc = true
   tags = {
@@ -58,15 +64,24 @@ resource "aws_route" "private_route" {
   nat_gateway_id = aws_nat_gateway.nat_gateway.id 
 }
 
-resource "aws_security_group" "basic_security" {
-  name = "basic_security"
+resource "aws_security_group" "public_security" {
+  name = "public_security"
   description = "Allow SSH access"
   vpc_id = var.vpc_id
 
   ingress { 
+    description = "SSH from anywhere"
     from_port = 22
     to_port = 22
     protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Replace with your IP address
+  }
+
+  ingress {
+    description = "HTTP access"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -76,10 +91,79 @@ resource "aws_security_group" "basic_security" {
     protocol = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "public_security"
+  }
 }
 
-output "basic_security_group_id" {
-  value = aws_security_group.basic_security.id
+resource "aws_security_group" "private_instance_sg" {
+  name        = "private_instance_sg"
+  description = "Allow SSH only from public instance"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description = "SSH from public instance only"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    security_groups = [aws_security_group.public_security.id]
+  }
+
+  #MySQL
+  ingress {
+    description = "MySQL access from public instance"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    security_groups = [aws_security_group.public_security.id]
+  }
+
+  ingress {
+    description = "API access from public instance"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    security_groups = [aws_security_group.public_security.id]
+  }
+
+
+  # Regras de SAÍDA (Outbound) - Liberando internet
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Libera HTTP para internet"
+  }
+
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Libera HTTPS para internet"
+  }
+
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Libera DNS (UDP) para internet"
+  }
+
+  tags = {
+    Name = "private_instance_sg"
+  }
+}
+
+output "public_security_group_id" {
+  value = aws_security_group.public_security.id
+}
+
+output "private_instance_sg_id" {
+  value = aws_security_group.private_instance_sg.id
 }
 
 output "vpc_id" {

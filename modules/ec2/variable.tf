@@ -2,10 +2,16 @@ variable "key_pair_name" {
   type = string
 }
 
-variable "private_instance_type" {
+variable "private_api_instance_type" {
+    type = string
+    default = "t2.small"
+    description = "Private api instance"
+}
+
+variable "private_db_instance_type" {
     type = string
     default = "t2.micro"
-    description = "Private instance"
+    description = "Private db instance"
 }
 
 variable "public_instance_type" {
@@ -35,4 +41,14 @@ variable "private_subnet" {
 variable "basic_security_group_id" {
   description = "Basic security group ID"
   type        = string
+}
+
+variable "private_instance_sg" {
+  description = "Allow SSH only from public instance"
+  type        = string
+}
+
+variable "instance_public_eip"{
+  description = "Elastic IP for public instance"
+  type        = string 
 }
